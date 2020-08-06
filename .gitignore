@@ -1,3 +1,6 @@
+examples/wav2vec/models/
+examples/wav2vec/output/
+
 # JetBrains PyCharm IDE
 .idea/
 
