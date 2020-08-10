@@ -250,6 +250,13 @@ class Trainer(object):
         bexists = PathManager.isfile(filename)
         if bexists:
             state = checkpoint_utils.load_checkpoint_to_cpu(filename)
+            # create new OrderedDict that does not contain `module.`
+            # from collections import OrderedDict
+            # new_state_model = OrderedDict()
+            # for k, v in state['model'].items():
+            #     name_new = k.replace("w2v_encoder.", "").replace("w2v_model.", "")
+            #     new_state_model[name_new] = v
+
             # load model parameters
             try:
                 self.get_model().load_state_dict(
