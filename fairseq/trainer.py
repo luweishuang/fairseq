@@ -250,7 +250,6 @@ class Trainer(object):
         bexists = PathManager.isfile(filename)
         if bexists:
             state = checkpoint_utils.load_checkpoint_to_cpu(filename)
-
             # create new OrderedDict that does not contain `module.`
             # from collections import OrderedDict
             # new_state_model = OrderedDict()

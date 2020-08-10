@@ -13,7 +13,7 @@ import random
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--root', metavar='DIR', default='/home/psc/Desktop/code/asr/data/mandarin/unsupervised', help='root directory containing flac files to index')
+    parser.add_argument('--root', metavar='DIR', default='/devdata/home/pishichan/code/asr/data/mandarin/unsupervised', help='root directory containing flac files to index')
     parser.add_argument('--valid-percent', default=0.01, type=float, metavar='D', help='percentage of data to use as validation set (between 0 and 1)')
     parser.add_argument('--dest', default='output', type=str, metavar='DIR', help='output directory')
     parser.add_argument('--ext', default='wav', type=str, metavar='EXT', help='extension to look for')
