@@ -250,7 +250,6 @@ class Trainer(object):
         bexists = PathManager.isfile(filename)
         if bexists:
             state = checkpoint_utils.load_checkpoint_to_cpu(filename)
-
             # load model parameters
             try:
                 self.get_model().load_state_dict(
