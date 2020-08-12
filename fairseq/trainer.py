@@ -368,6 +368,7 @@ class Trainer(object):
             max_positions=utils.resolve_max_positions(
                 self.task.max_positions(),
                 self.model.max_positions(),
+                self.args.max_tokens,      # self added
             ),
             ignore_invalid_inputs=self.args.skip_invalid_size_inputs_valid_test,
             required_batch_size_multiple=self.args.required_batch_size_multiple,
