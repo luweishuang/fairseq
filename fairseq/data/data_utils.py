@@ -193,6 +193,8 @@ def filter_by_size(indices, dataset, max_positions, raise_exception=False):
     else:
         indices, ignored = _filter_by_size_dynamic(indices, dataset.size, max_positions)
 
+    print("max_positions = ", max_positions)
+    print("len(ignored) = ", len(ignored))
     if len(ignored) > 0 and raise_exception:
         raise Exception((
             'Size of sample #{} is invalid (={}) since max_positions={}, '
