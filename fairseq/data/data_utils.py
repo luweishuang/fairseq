@@ -11,6 +11,7 @@ import contextlib
 import itertools
 import logging
 import os
+import warnings
 
 from typing import Tuple, Optional
 
@@ -54,7 +55,7 @@ def collate_tokens(values, pad_idx, eos_idx=None, left_pad=False, move_eos_to_be
     return res
 
 
-def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, default='cached'):
+def load_indexed_dataset(path, dictionary=None, dataset_impl=None, combine=False, default='cached'):
     """A helper function for loading indexed datasets.
 
     Args:
@@ -182,6 +183,11 @@ def filter_by_size(indices, dataset, max_positions, raise_exception=False):
         raise_exception (bool, optional): if ``True``, raise an exception if
             any elements are filtered (default: False).
     """
+    warnings.warn(
+        'data_utils.filter_by_size is deprecated. '
+        'Use `FairseqDataset::filter_indices_by_size` instead.',
+        stacklevel=2
+    )
     if isinstance(max_positions, float) or isinstance(max_positions, int):
         if hasattr(dataset, 'sizes') and isinstance(dataset.sizes, np.ndarray):
             ignored = indices[dataset.sizes[indices] > max_positions].tolist()
