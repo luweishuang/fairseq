@@ -7,24 +7,23 @@
 """
 Helper script to pre-compute embeddings for a wav2letter++ dataset
 """
-
+import glob
 import argparse
 import os
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tsv-dir", default="output/zh/asr")
-    parser.add_argument("--output-dir", default="output/zh")
+    parser.add_argument("--data-dir", default="output/zh")
     args = parser.parse_args()
 
-    os.makedirs(args.output_dir, exist_ok=True)
-    for cur_file in os.listdir(args.tsv_dir):
-        output_name = cur_file.replace(".tsv", "")
-        tsv_file = os.path.join(args.tsv_dir, cur_file)
+    search_path = os.path.join(args.data_dir, '*.tsv')
+    for cur_file in glob.iglob(search_path, recursive=True):
+        tsv_file = os.path.realpath(cur_file)
+        output_name = os.path.basename(cur_file).replace(".tsv", "")
         transcriptions = {}
-        with open(tsv_file, "r") as tsv, open(os.path.join(args.output_dir, output_name + ".ltr.txt"), "w") as ltr_out,\
-                open(os.path.join(args.output_dir, output_name + ".wrd.txt"), "w") as wrd_out:
+        with open(tsv_file, "r") as tsv, open(os.path.join(args.data_dir, output_name + ".ltr.txt"), "w") as ltr_out,\
+                open(os.path.join(args.data_dir, output_name + ".wrd.txt"), "w") as wrd_out:
             root = next(tsv).strip()
             for line in tsv:
                 line = line.strip()
