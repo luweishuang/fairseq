@@ -13,9 +13,9 @@ import random
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--root', metavar='DIR', default='/devdata/home/pishichan/code/asr/data/mandarin/unsupervised', help='root directory containing flac files to index')
+    parser.add_argument('--root', metavar='DIR', default='/home/psc/Desktop/code/asr/data/mandarin/supervised', help='root directory containing flac files to index')
     parser.add_argument('--valid-percent', default=0.01, type=float, metavar='D', help='percentage of data to use as validation set (between 0 and 1)')
-    parser.add_argument('--dest', default='output', type=str, metavar='DIR', help='output directory')
+    parser.add_argument('--dest', default='output/zh', type=str, metavar='DIR', help='output directory')
     parser.add_argument('--ext', default='wav', type=str, metavar='EXT', help='extension to look for')
     parser.add_argument('--seed', default=42, type=int, metavar='N', help='random seed')
     parser.add_argument('--path-must-contain', default=None, type=str, metavar='FRAG',
@@ -27,7 +27,7 @@ def main(args):
     assert args.valid_percent >= 0 and args.valid_percent <= 1.
 
     dir_path = os.path.realpath(args.root)
-    search_path = os.path.join(dir_path, '*/*/*.' + args.ext)
+    search_path = os.path.join(dir_path, '*/*/*/*.' + args.ext)
     rand = random.Random(args.seed)
 
     with open(os.path.join(args.dest, 'train.tsv'), 'w') as train_f, open(os.path.join(args.dest, 'valid.tsv'), 'w') as valid_f:

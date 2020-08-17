@@ -14,8 +14,8 @@ import os
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tsv", default="output/en/train.tsv")
-    parser.add_argument("--output-dir", default="output/en")
+    parser.add_argument("--tsv", default="output/zh/train.tsv")
+    parser.add_argument("--output-dir", default="output/zh")
     parser.add_argument("--output-name", default="train")
     args = parser.parse_args()
 
@@ -33,21 +33,23 @@ def main():
             line = line.strip()
             dir = os.path.dirname(line)
             if dir not in transcriptions:
-                parts = dir.split("/")
-                trans_path = f"{parts[-2]}-{parts[-1]}.trans.txt"
-                path = os.path.join(root, dir, trans_path)
+                path = os.path.join(root, os.path.dirname(dir), "trans.txt")
                 assert os.path.exists(path)
                 texts = {}
                 with open(path, "r") as trans_f:
                     for tline in trans_f:
-                        items = tline.strip().split()
-                        texts[items[0]] = " ".join(items[1:])
+                        items = tline.strip().split("<--->")
+                        char_list = []
+                        for cur_char in items[1:]:
+                            char_list.append(cur_char)
+                        texts[items[0]] = " ".join(char_list)
                 transcriptions[dir] = texts
             part = os.path.basename(line).split(".")[0]
             assert part in transcriptions[dir]
+            l1 = transcriptions[dir][part].replace(" ", "")
             print(transcriptions[dir][part], file=wrd_out)
             print(
-                " ".join(list(transcriptions[dir][part].replace(" ", "|"))) + " |",
+                " ".join(list(transcriptions[dir][part].replace(" ", "|"))),
                 file=ltr_out,
             )
 
