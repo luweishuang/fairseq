@@ -14,45 +14,52 @@ import os
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tsv", default="output/zh/train.tsv")
+    parser.add_argument("--tsv-dir", default="output/zh/asr")
     parser.add_argument("--output-dir", default="output/zh")
-    parser.add_argument("--output-name", default="train")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
+    for cur_file in os.listdir(args.tsv_dir):
+        output_name = cur_file.replace(".tsv", "")
+        tsv_file = os.path.join(args.tsv_dir, cur_file)
+        transcriptions = {}
+        with open(tsv_file, "r") as tsv, open(os.path.join(args.output_dir, output_name + ".ltr.txt"), "w") as ltr_out,\
+                open(os.path.join(args.output_dir, output_name + ".wrd.txt"), "w") as wrd_out:
+            root = next(tsv).strip()
+            for line in tsv:
+                line = line.strip()
+                dir = os.path.dirname(line)
+                if dir not in transcriptions:
+                    path = os.path.join(root, os.path.dirname(dir), "trans.txt")
+                    assert os.path.exists(path)
+                    texts = {}
+                    with open(path, "r") as trans_f:
+                        for tline in trans_f:
+                            items = tline.strip().split("<--->")
+                            char_list = []
+                            for cur_char in items[1:]:
+                                char_list.append(cur_char)
+                            texts[items[0]] = " ".join(char_list)
+                    transcriptions[dir] = texts
+                part = os.path.basename(line).split(".")[0]
+                assert part in transcriptions[dir]
+                print(" ".join(list(transcriptions[dir][part].replace(" ", "|"))), file=wrd_out)
+                print(
+                    " ".join(list(transcriptions[dir][part].replace(" ", "|"))),
+                    file=ltr_out,
+                )
 
-    transcriptions = {}
 
-    with open(args.tsv, "r") as tsv, open(
-            os.path.join(args.output_dir, args.output_name + ".ltr.txt"), "w"
-    ) as ltr_out, open(
-        os.path.join(args.output_dir, args.output_name + ".wrd.txt"), "w"
-    ) as wrd_out:
-        root = next(tsv).strip()
-        for line in tsv:
-            line = line.strip()
-            dir = os.path.dirname(line)
-            if dir not in transcriptions:
-                path = os.path.join(root, os.path.dirname(dir), "trans.txt")
-                assert os.path.exists(path)
-                texts = {}
-                with open(path, "r") as trans_f:
-                    for tline in trans_f:
-                        items = tline.strip().split("<--->")
-                        char_list = []
-                        for cur_char in items[1:]:
-                            char_list.append(cur_char)
-                        texts[items[0]] = " ".join(char_list)
-                transcriptions[dir] = texts
-            part = os.path.basename(line).split(".")[0]
-            assert part in transcriptions[dir]
-            l1 = transcriptions[dir][part].replace(" ", "")
-            print(transcriptions[dir][part], file=wrd_out)
-            print(
-                " ".join(list(transcriptions[dir][part].replace(" ", "|"))),
-                file=ltr_out,
-            )
+def write_token_2_dict():
+    tkn_file = "output/zh/tokens.txt"
+    dict_file = "output/zh/dict.ltr.txt"
+    cnt = 94802
+    with open(tkn_file, "r") as tkn_fr, open(dict_file, "w") as dict_fw:
+        for line in tkn_fr:
+            wrt_line = line.strip() + " " + str(cnt) + "\n"
+            dict_fw.write(wrt_line)
 
 
 if __name__ == "__main__":
+    # write_token_2_dict()
     main()

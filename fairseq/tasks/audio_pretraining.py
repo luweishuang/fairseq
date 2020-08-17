@@ -104,7 +104,7 @@ class AudioPretrainingTask(FairseqTask):
         if self.args.labels:
             dict_path = os.path.join(self.args.data, f"dict.{self.args.labels}.txt")
             self._target_dictionary = Dictionary.load(dict_path)
-            label_path = os.path.join(self.args.data, f"{split}.{self.args.labels}")
+            label_path = os.path.join(self.args.data, f"{split}.{self.args.labels}.txt")
             labels = []
             with open(label_path, "r") as f:
                 for line in f:
