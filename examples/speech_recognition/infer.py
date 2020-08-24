@@ -49,7 +49,7 @@ output units",
         "--rnnt_len_penalty", default=-0.5, help="rnnt length penalty on word level"
     )
     parser.add_argument(
-        "--w2l-decoder", choices=["viterbi", "kenlm", "fairseqlm"], help="use a w2l decoder"
+        "--w2l-decoder", choices=["viterbi", "kenlm", "kenlmFree", "fairseqlm"], help="use a w2l decoder"
     )
     parser.add_argument("--lexicon", help="lexicon for w2l decoder")
     parser.add_argument("--unit-lm", action='store_true', help="if using a unit lm")
@@ -290,6 +290,10 @@ def main(args, task=None, model_state=None):
             from examples.speech_recognition.w2l_decoder import W2lKenLMDecoder
 
             return W2lKenLMDecoder(args, task.target_dictionary)
+        elif w2l_decoder == "kenlmFree":
+            from examples.speech_recognition.w2l_decoder import W2lKenLMFreeDecoder
+
+            return W2lKenLMFreeDecoder(args, task.target_dictionary)
         elif w2l_decoder == "fairseqlm":
             from examples.speech_recognition.w2l_decoder import W2lFairseqLMDecoder
 

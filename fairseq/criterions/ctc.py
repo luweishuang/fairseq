@@ -25,7 +25,7 @@ class CtcCriterion(FairseqCriterion):
         self.post_process = remove_bpe if remove_bpe else "letter"
 
         if wer_args is not None:
-            from examples.speech_recognition.w2l_decoder import W2lKenLMDecoder
+            from examples.speech_recognition.w2l_decoder import W2lKenLMDecoder, W2lKenLMFreeDecoder
 
             # wer_compute_kenlm, wer_lexicon, lm_w, ws_w = eval(wer_args)
             wer_compute_kenlm = "/devdata/home/pishichan/code/asr/asr_v3/models/streaming_convnets/language_model.bin"
@@ -46,7 +46,8 @@ class CtcCriterion(FairseqCriterion):
             dec_args.unk_weight = -math.inf
             dec_args.sil_weight = 0
 
-            self.w2l_decoder = W2lKenLMDecoder(dec_args, task.target_dictionary)
+            # self.w2l_decoder = W2lKenLMDecoder(dec_args, task.target_dictionary)
+            self.w2l_decoder = W2lKenLMFreeDecoder(dec_args, task.target_dictionary)
         else:
             self.w2l_decoder = None
 
