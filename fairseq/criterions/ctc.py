@@ -27,7 +27,11 @@ class CtcCriterion(FairseqCriterion):
         if wer_args is not None:
             from examples.speech_recognition.w2l_decoder import W2lKenLMDecoder
 
-            wer_compute_kenlm, wer_lexicon, lm_w, ws_w = eval(wer_args)
+            # wer_compute_kenlm, wer_lexicon, lm_w, ws_w = eval(wer_args)
+            wer_compute_kenlm = "/home/psc/Desktop/code/web/voice_chatbot/asr_tts/v3/models/streaming_convnets/language_model.bin"
+            wer_lexicon = "/home/psc/Desktop/code/web/voice_chatbot/asr_tts/v3/models/streaming_convnets/lexicon.txt"
+            lm_w = 2
+            ws_w = -1
 
             dec_args = Namespace()
             dec_args.nbest = 1
