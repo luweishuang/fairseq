@@ -21,7 +21,7 @@ from fairseq.utils import apply_to_sample
 from examples.speech_recognition.data.replabels import unpack_replabels
 
 try:
-    from wav2letter.common import create_word_dict, load_words
+    from wav2letter.common import create_word_dict, load_words, Dictionary
     from wav2letter.criterion import CpuViterbiPath, get_data_ptr_as_bytes
     from wav2letter.decoder import (
         CriterionType,
@@ -141,17 +141,17 @@ class W2lKenLMDecoder(W2lDecoder):
         self.lm = KenLM(args.kenlm_model, self.word_dict)
         self.trie = Trie(self.vocab_size, self.silence)
 
-        # start_state = self.lm.start(False)
-        # for i, (word, spellings) in enumerate(self.lexicon.items()):
-        #     word_idx = self.word_dict.get_index(word)
-        #     _, score = self.lm.score(start_state, word_idx)
-        #     for spelling in spellings:
-        #         spelling_idxs = [tgt_dict.index(token) for token in spelling]
-        #         assert (
-        #             tgt_dict.unk() not in spelling_idxs
-        #         ), f"{spelling} {spelling_idxs}"
-        #         self.trie.insert(spelling_idxs, word_idx, score)
-        # self.trie.smear(SmearingMode.MAX)
+        start_state = self.lm.start(False)
+        for i, (word, spellings) in enumerate(self.lexicon.items()):
+            word_idx = self.word_dict.get_index(word)
+            _, score = self.lm.score(start_state, word_idx)
+            for spelling in spellings:
+                spelling_idxs = [tgt_dict.index(token) for token in spelling]
+                assert (
+                    tgt_dict.unk() not in spelling_idxs
+                ), f"{spelling} {spelling_idxs}"
+                self.trie.insert(spelling_idxs, word_idx, score)
+        self.trie.smear(SmearingMode.MAX)
 
         self.decoder_opts = DecoderOptions(
             args.beam,
@@ -215,12 +215,14 @@ class W2lKenLMFreeDecoder(W2lDecoder):
             if "<ctc_blank>" in tgt_dict.indices
             else tgt_dict.bos()
         )
-        self.lexicon = load_words(args.lexicon)
-        self.word_dict = create_word_dict(self.lexicon)
-        self.unk_word = self.word_dict.get_index("<unk>")
-
-        self.lm = KenLM(args.kenlm_model, self.word_dict)
-        self.trie = Trie(self.vocab_size, self.silence)
+        token_dict = Dictionary(args.lexicon)
+        # useless
+        # token_dict.add_entry("<s>", 0)
+        # token_dict.add_entry("<pad>", 1)
+        # token_dict.add_entry("</s>", 2)
+        # token_dict.add_entry("<unk>", 3)
+        # print(token_dict.index_size(), len(tgt_dict))
+        self.lm = KenLM(args.kenlm_model, token_dict)
 
         self.decoder_opts = DecoderOptions(
             args.beam,

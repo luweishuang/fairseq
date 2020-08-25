@@ -134,9 +134,12 @@ def process_predictions(
                 logger.debug("TARGET:" + tgt_words)
                 logger.debug("___________________")
 
-        hyp_words = hyp_words.split()
-        tgt_words = tgt_words.split()
-        return editdistance.eval(hyp_words, tgt_words), len(tgt_words)
+        # hyp_words = hyp_words.split()
+        # tgt_words = tgt_words.split()
+        hyp_pieces = hyp_pieces.split(" ")
+        tgt_pieces = tgt_pieces.split(" ")
+        # return editdistance.eval(hyp_words, tgt_words), len(tgt_words)
+        return editdistance.eval(hyp_pieces, tgt_pieces), len(tgt_pieces)
 
 
 def prepare_result_files(args):
@@ -238,7 +241,7 @@ def main(args, task=None, model_state=None):
     logger.info(args)
 
     use_cuda = torch.cuda.is_available() and not args.cpu
-
+    logger.info("use_cuda={}".format(use_cuda))
     if task is None:
         # Load dataset splits
         task = tasks.setup_task(args)
@@ -251,7 +254,6 @@ def main(args, task=None, model_state=None):
 
     # Set dictionary
     tgt_dict = task.target_dictionary
-
     logger.info("| decoding with criterion {}".format(args.criterion))
 
     # Load ensemble
@@ -400,8 +402,8 @@ def main(args, task=None, model_state=None):
         logger.info(f"saved {len(features)} emissions to {args.dump_features}")
     else:
         if lengths_t > 0:
-            wer = errs_t * 100.0 / lengths_t
-            logger.info(f"WER: {wer}")
+            cer = errs_t * 100.0 / lengths_t
+            logger.info(f"CER: {cer}")
 
         logger.info(
             "| Processed {} sentences ({} tokens) in {:.1f}s ({:.2f}"
