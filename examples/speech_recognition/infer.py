@@ -236,9 +236,9 @@ def main(args, task=None, model_state=None):
     if args.max_tokens is None and args.max_sentences is None:
         args.max_tokens = 4000000
     logger.info(args)
-
+    
     use_cuda = torch.cuda.is_available() and not args.cpu
-
+    
     if task is None:
         # Load dataset splits
         task = tasks.setup_task(args)
