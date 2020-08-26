@@ -134,9 +134,12 @@ def process_predictions(
                 logger.debug("TARGET:" + tgt_words)
                 logger.debug("___________________")
 
-        hyp_words = hyp_words.split()
-        tgt_words = tgt_words.split()
-        return editdistance.eval(hyp_words, tgt_words), len(tgt_words)
+        # hyp_words = hyp_words.split()
+        # tgt_words = tgt_words.split()
+        hyp_pieces = hyp_pieces.split(" ")
+        tgt_pieces = tgt_pieces.split(" ")
+        # return editdistance.eval(hyp_words, tgt_words), len(tgt_words)
+        return editdistance.eval(hyp_pieces, tgt_pieces), len(tgt_pieces)
 
 
 def prepare_result_files(args):
@@ -219,7 +222,7 @@ class ExistingEmissionsDecoder(object):
         self.decoder = decoder
         self.emissions = emissions
 
-    def generate(self, models, sample, prefix_tokens=None):
+    def generate(self, models, sample, **unused):
         ids = sample["id"].cpu().numpy()
         try:
             emissions = np.stack(self.emissions[ids])
@@ -238,7 +241,6 @@ def main(args, task=None, model_state=None):
     logger.info(args)
     
     use_cuda = torch.cuda.is_available() and not args.cpu
-    
     if task is None:
         # Load dataset splits
         task = tasks.setup_task(args)
@@ -251,7 +253,6 @@ def main(args, task=None, model_state=None):
 
     # Set dictionary
     tgt_dict = task.target_dictionary
-
     logger.info("| decoding with criterion {}".format(args.criterion))
 
     # Load ensemble
@@ -368,7 +369,6 @@ def main(args, task=None, model_state=None):
 
             for i, sample_id in enumerate(sample["id"].tolist()):
                 speaker = None
-                # id = task.dataset(args.gen_subset).ids[int(sample_id)]
                 id = sample_id
                 toks = sample["target"][i, :] if 'target_label' not in sample else sample["target_label"][i, :]
                 target_tokens = (
@@ -400,8 +400,8 @@ def main(args, task=None, model_state=None):
         logger.info(f"saved {len(features)} emissions to {args.dump_features}")
     else:
         if lengths_t > 0:
-            wer = errs_t * 100.0 / lengths_t
-            logger.info(f"WER: {wer}")
+            cer = errs_t * 100.0 / lengths_t
+            logger.info(f"CER: {cer}")
 
         logger.info(
             "| Processed {} sentences ({} tokens) in {:.1f}s ({:.2f}"
