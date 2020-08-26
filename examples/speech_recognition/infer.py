@@ -370,7 +370,6 @@ def main(args, task=None, model_state=None):
 
             for i, sample_id in enumerate(sample["id"].tolist()):
                 speaker = None
-                # id = task.dataset(args.gen_subset).ids[int(sample_id)]
                 id = sample_id
                 toks = sample["target"][i, :] if 'target_label' not in sample else sample["target_label"][i, :]
                 target_tokens = (

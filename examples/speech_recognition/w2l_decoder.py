@@ -216,12 +216,6 @@ class W2lKenLMFreeDecoder(W2lDecoder):
             else tgt_dict.bos()
         )
         token_dict = Dictionary(args.lexicon)
-        # useless
-        # token_dict.add_entry("<s>", 0)
-        # token_dict.add_entry("<pad>", 1)
-        # token_dict.add_entry("</s>", 2)
-        # token_dict.add_entry("<unk>", 3)
-        # print(token_dict.index_size(), len(tgt_dict))
         self.lm = KenLM(args.kenlm_model, token_dict)
 
         self.decoder_opts = DecoderOptions(
