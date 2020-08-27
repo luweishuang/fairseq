@@ -31,7 +31,6 @@ def main():
     dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/'
     dataset_name = "test"
     dest_dir = "output/all"
-
     discard_cnt = 0
     all_cnt = 0
     with open(os.path.join(dest_dir, dataset_name + '.tsv'), 'w') as tsv_fw, open(os.path.join(dest_dir, dataset_name + '.ltr.txt'), 'w') as ltr_fw:
