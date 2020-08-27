@@ -27,10 +27,10 @@ def char_in_dict(sentence):
 
 
 def main():
-    src_trans_file = "/home/psc/Desktop/code/asr/data/test/yitu/reverb/reverb.txt"
-    dataset_path = os.path.dirname(src_trans_file)
-    dataset_name = "yitu-reverb"
-    dest_dir = "output/zh"
+    src_trans_file = "/home/psc/Desktop/code/asr/fairseq/examples/wav2vec/output/train.txt"
+    dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/'
+    dataset_name = "train"
+    dest_dir = "output"
 
     discard_cnt = 0
     all_cnt = 0
@@ -47,7 +47,7 @@ def main():
                     discard_cnt += 1
                     continue
 
-                audio_name = os.path.join("wav", wav_name + ".wav")
+                audio_name = wav_name + ".wav"
                 audio_path = os.path.join(dataset_path, audio_name)
 
                 frames = soundfile.info(audio_path).frames
