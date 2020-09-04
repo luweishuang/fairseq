@@ -18,6 +18,7 @@ import os.path as osp
 import warnings
 from fairseq import tasks
 from fairseq.utils import apply_to_sample
+import torch.nn.functional as F
 from examples.speech_recognition.data.replabels import unpack_replabels
 
 try:
@@ -244,7 +245,39 @@ class W2lKenLMFreeDecoder(W2lDecoder):
             self.asg_transitions,   # Lexicon-free decoder with token-LM
         )
 
-    def decode(self, emissions):
+    def top_k_top_p_filtering(self, logits, top_k=0, top_p=0.0, filter_value=-float('Inf')):
+        """ Filter a distribution of logits using top-k and/or nucleus (top-p) filtering
+            Args:
+                logits: logits distribution shape (vocabulary size)
+                top_k > 0: keep only top k tokens with highest probability (top-k filtering).
+                top_p > 0.0: keep the top tokens with cumulative probability >= top_p (nucleus filtering).
+                    Nucleus filtering is described in Holtzman et al. (http://arxiv.org/abs/1904.09751)
+            From: https://gist.github.com/thomwolf/1a5a29f6962089e871b94cbd09daf317
+        """
+        assert logits.dim() == 1  # batch size 1 for now - could be updated for more but the code would be less clear
+        top_k = min(top_k, logits.size(-1))  # Safety check
+        if top_k > 0:
+            # Remove all tokens with a probability less than the last token of the top-k
+            # torch.topk()返回最后一维最大的top_k个元素，返回值为二维(values,indices)
+            # ...表示其他维度由计算机自行推断
+            indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
+            logits[indices_to_remove] = filter_value  # 对于topk之外的其他元素的logits值设为负无穷
+
+        if top_p > 0.0:
+            sorted_logits, sorted_indices = torch.sort(logits, descending=True)  # 对logits进行递减排序
+            cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+
+            # Remove tokens with cumulative probability above the threshold
+            sorted_indices_to_remove = cumulative_probs > top_p
+            # Shift the indices to the right to keep also the first token above the threshold
+            sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+            sorted_indices_to_remove[..., 0] = 0
+
+            indices_to_remove = sorted_indices[sorted_indices_to_remove]
+            logits[indices_to_remove] = filter_value
+        return logits
+    
+    def decode_src(self, emissions):
         B, T, N = emissions.size()
         hypos = []
         for b in range(B):
@@ -259,6 +292,42 @@ class W2lKenLMFreeDecoder(W2lDecoder):
                         "score": result.score,
                     }
                     for result in nbest_results
+                ]
+            )
+        return hypos
+
+    def decode_1(self, emissions):
+        repetition_penalty = 1.0
+        temperature = 0.88
+        topk = 0
+        topp = 0.85
+
+        B, T, N = emissions.size()
+        hypos = []
+        for b in range(B):
+            cur_emissions = emissions[b]
+            generated = []
+            # 最多生成max_len个token
+            for ii in range(T):
+                next_token_logits = cur_emissions[ii, :]    # shape=(v)
+                # 对于已生成的结果generated中的每个token添加一个重复惩罚项，降低其生成概率
+                for id in set(generated):
+                    next_token_logits[id] /= repetition_penalty
+                next_token_logits = next_token_logits / temperature
+                # 对于[UNK]的概率设为无穷小，也就是说模型的预测结果不可能是[UNK]这个token
+                next_token_logits[self.tgt_dict.index("<unk>")] = -float('Inf')
+                filtered_logits = self.top_k_top_p_filtering(next_token_logits, top_k=topk, top_p=topp)
+                # torch.multinomial表示从候选集合中无放回地进行抽取num_samples个元素，权重越高，抽到的几率越高，返回元素的下标
+                next_token = torch.multinomial(F.softmax(filtered_logits, dim=-1), num_samples=1)
+                if next_token.item() == self.tgt_dict.index("</s>"):  # 遇到[SEP]则表明response生成结束
+                    break
+                generated.append(next_token.item())
+            hypos.append(
+                [
+                    {
+                        "tokens": self.get_tokens(generated),
+                        "score": 100.0,
+                    }
                 ]
             )
         return hypos

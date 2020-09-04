@@ -59,6 +59,19 @@ def write_token_2_dict():
             dict_fw.write(wrt_line)
 
 
+def calc_wav_dur_time():
+    # tsv_file = "output/zh/wav2vec/train.tsv"   # total hours == 402
+    tsv_file = "output/zh/wav2vec/valid.tsv"     # total hours == 3.9
+    wav_len_all = 0.0
+    with open(tsv_file, "r") as fr_tsv:
+        root = next(fr_tsv).strip()
+        for line in fr_tsv:
+            wav_file, cur_wav_len = line.strip().split("\t")
+            wav_len_all += float(cur_wav_len) /16000.0
+    print("wav_len_all = ", wav_len_all)
+
+
 if __name__ == "__main__":
+    calc_wav_dur_time()
     # write_token_2_dict()
-    main()
+    # main()
