@@ -27,13 +27,14 @@ def char_in_dict(sentence):
 
 
 def main():
-    src_trans_file = "output/all/test.txt"
-    dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/'
-    dataset_name = "test"
-    dest_dir = "output/all"
+    src_trans_file = "/home/psc/Desktop/code/asr/data/test/yitu/chat/chat.txt"
+    dataset_name = os.path.basename(src_trans_file).replace(".txt", "")
+    dataset_path = os.path.join('/home/psc/Desktop/code/asr/data/test/yitu/', dataset_name)
+    output_name = "yitu-chat"
+    dest_dir = "output/zh/test"
     discard_cnt = 0
     all_cnt = 0
-    with open(os.path.join(dest_dir, dataset_name + '.tsv'), 'w') as tsv_fw, open(os.path.join(dest_dir, dataset_name + '.ltr.txt'), 'w') as ltr_fw:
+    with open(os.path.join(dest_dir, output_name + '.tsv'), 'w') as tsv_fw, open(os.path.join(dest_dir, output_name + '.ltr.txt'), 'w') as ltr_fw:
         print(dataset_path, file=tsv_fw)
         with open(src_trans_file, "r") as fr:
             for line in fr:
@@ -46,7 +47,7 @@ def main():
                     discard_cnt += 1
                     continue
 
-                audio_name = wav_name + ".wav"
+                audio_name = os.path.join("wav", wav_name + ".wav")
                 audio_path = os.path.join(dataset_path, audio_name)
 
                 frames = soundfile.info(audio_path).frames
@@ -62,3 +63,10 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+'''
+yitu-chat
+discard_cnt = 97, all_cnt = 2021 
+yitu-reverb
+discard_cnt = 46, all_cnt = 976 
+'''

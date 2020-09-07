@@ -277,7 +277,7 @@ class W2lKenLMFreeDecoder(W2lDecoder):
             logits[indices_to_remove] = filter_value
         return logits
     
-    def decode_src(self, emissions):
+    def decode(self, emissions):
         B, T, N = emissions.size()
         hypos = []
         for b in range(B):
