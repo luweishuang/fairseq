@@ -27,11 +27,13 @@ def char_in_dict(sentence):
 
 
 def main():
-    src_trans_file = "/home/psc/Desktop/code/asr/data/test/yitu/chat/chat.txt"
-    dataset_name = os.path.basename(src_trans_file).replace(".txt", "")
-    dataset_path = os.path.join('/home/psc/Desktop/code/asr/data/test/yitu/', dataset_name)
+    dataset_name = "chat"
+    dataset_base_path = "/home/psc/Desktop/code/asr/data/test/yitu"
     output_name = "yitu-chat"
+    src_trans_file = os.path.join(dataset_base_path, dataset_name, dataset_name + ".txt")
+    dataset_path = os.path.join(dataset_base_path, dataset_name)
     dest_dir = "output/zh/test"
+    os.makedirs(dest_dir, exist_ok=True)
     discard_cnt = 0
     all_cnt = 0
     with open(os.path.join(dest_dir, output_name + '.tsv'), 'w') as tsv_fw, open(os.path.join(dest_dir, output_name + '.ltr.txt'), 'w') as ltr_fw:
