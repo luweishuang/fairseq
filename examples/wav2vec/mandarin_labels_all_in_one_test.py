@@ -27,9 +27,9 @@ def char_in_dict(sentence):
 
 
 def main():
-    dataset_name = "chat"
-    dataset_base_path = "/home/psc/Desktop/code/asr/data/test/yitu"
-    output_name = "yitu-chat"
+    dataset_name = "reverb"
+    dataset_base_path = "/devdata/home/pishichan/code/asr/data/test/yitu"
+    output_name = "yitu-reverb"
     src_trans_file = os.path.join(dataset_base_path, dataset_name, dataset_name + ".txt")
     dataset_path = os.path.join(dataset_base_path, dataset_name)
     dest_dir = "output/zh/test"
