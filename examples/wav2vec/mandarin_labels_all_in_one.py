@@ -27,10 +27,10 @@ def char_in_dict(sentence):
 
 
 def main():
-    src_trans_file = "output/all/test.txt"
+    src_trans_file = "output/all1/train.txt"
     dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/'
-    dataset_name = "test"
-    dest_dir = "output/all"
+    dataset_name = "train"
+    dest_dir = "output/all1"
     discard_cnt = 0
     all_cnt = 0
     with open(os.path.join(dest_dir, dataset_name + '.tsv'), 'w') as tsv_fw, open(os.path.join(dest_dir, dataset_name + '.ltr.txt'), 'w') as ltr_fw:

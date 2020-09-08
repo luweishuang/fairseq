@@ -1,7 +1,12 @@
 nohup.out
 
 examples/wav2vec/models/
-examples/wav2vec/output/
+examples/wav2vec/output/all20
+examples/wav2vec/output/all50
+examples/wav2vec/output/decoder_rst
+examples/wav2vec/output/en
+examples/wav2vec/output/zh
+
 
 # JetBrains PyCharm IDE
 .idea/
