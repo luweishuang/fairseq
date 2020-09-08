@@ -27,9 +27,15 @@ def char_in_dict(sentence):
 
 
 def main():
+<<<<<<< HEAD
     src_trans_file = "output/all1/test.txt"
     dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/'
     dataset_name = "test"
+=======
+    src_trans_file = "output/all1/train.txt"
+    dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/'
+    dataset_name = "train"
+>>>>>>> 502334ec7d51ff30a61ae1c5eb730ebb269730ba
     dest_dir = "output/all1"
     discard_cnt = 0
     all_cnt = 0
