@@ -160,6 +160,8 @@ class CtcCriterion(FairseqCriterion):
                     toks = lp.argmax(dim=-1).unique_consecutive()
                     pred_units_arr = toks[toks != self.blank_idx].tolist()
 
+                    print("pred_units_arr = ", pred_units_arr)
+                    print("targ_units_arr = ", targ_units_arr)
                     c_err += editdistance.eval(pred_units_arr, targ_units_arr)
                     c_len += len(targ_units_arr)
 
