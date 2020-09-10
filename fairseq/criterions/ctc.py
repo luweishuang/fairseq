@@ -1,8 +1,4 @@
-# All rights reserved.
-#
-# This source code is licensed under the license found in the LICENSE file in
-# the root directory of this source tree. An additional grant of patent rights
-# can be found in the PATENTS file in the same directory.
+# -*- coding: UTF-8 -*-
 
 from argparse import Namespace
 import math
@@ -136,6 +132,8 @@ class CtcCriterion(FairseqCriterion):
                     else sample["target"],
                     input_lengths,
                 ):
+                    print("inp_l = ", inp_l)
+                    print("lp.size = ", lp.size())
                     lp = lp[:inp_l].unsqueeze(0)
 
                     decoded = None
@@ -160,8 +158,12 @@ class CtcCriterion(FairseqCriterion):
                     toks = lp.argmax(dim=-1).unique_consecutive()
                     pred_units_arr = toks[toks != self.blank_idx].tolist()
 
-                    print("pred_units_arr = ", pred_units_arr)
-                    print("targ_units_arr = ", targ_units_arr)
+                    # print("pred_units_arr = ", pred_units_arr)
+                    # print("targ_units_arr = ", targ_units_arr)
+                    # if len(pred_units_arr) == 0:
+                    #     print("inp_l = ", inp_l)
+                    #     print("lp = ", lp)
+                    #     print("toks = ", toks)    # 几乎都指向 0
                     c_err += editdistance.eval(pred_units_arr, targ_units_arr)
                     c_len += len(targ_units_arr)
 
