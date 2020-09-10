@@ -14,9 +14,9 @@ import os
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tsv", default="output/en/train.tsv")
-    parser.add_argument("--output-dir", default="output/en")
-    parser.add_argument("--output-name", default="train")
+    parser.add_argument("tsv")
+    parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--output-name", required=True)
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)

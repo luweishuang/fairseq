@@ -295,7 +295,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
 
     def forward(self, **kwargs):
         encoder_out = self.encoder(tbc=False, **kwargs)
-        decoder_out = self.decoder(encoder_out=encoder_out, **kwargs)
+        decoder_out = self.decoder(encoder_out=encoder_out, **kwargs)   # prev_output_tokens
         return decoder_out
 
     def upgrade_state_dict_named(self, state_dict, name):
