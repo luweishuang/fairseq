@@ -132,8 +132,12 @@ class CtcCriterion(FairseqCriterion):
                     else sample["target"],
                     input_lengths,
                 ):
+<<<<<<< HEAD
                     print("inp_l = ", inp_l)
                     print("lp.size = ", lp.size())
+=======
+                    # print("lp.size = ", lp.size())    # inp_l, 8583
+>>>>>>> 252efa99d9194b2e3e2a842e14747e9aa8806f3f
                     lp = lp[:inp_l].unsqueeze(0)
 
                     decoded = None

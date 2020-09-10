@@ -180,8 +180,8 @@ class W2lKenLMDecoder(W2lDecoder):
             self.blank,
             self.unk_word,
             self.asg_transitions,
-            # False,    # Lexicon decoder with word-LM
-            True,       # Lexicon decoder with tkn-LM
+            False,    # Lexicon decoder with word-LM
+            # True,       # Lexicon decoder with tkn-LM
         )
 
     def decode(self, emissions):
