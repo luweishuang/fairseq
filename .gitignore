@@ -4,11 +4,7 @@ examples/wav2vec/models/mandarin/ctc
 examples/wav2vec/models/mandarin/w2v_zh
 examples/wav2vec/models/mandarin/wav2vec_small.pt
 examples/wav2vec/models/mandarin/wav2vec_vox.pt
-examples/wav2vec/output/all20
-examples/wav2vec/output/all50
-examples/wav2vec/output/decoder_rst
-examples/wav2vec/output/en
-examples/wav2vec/output/zh
+examples/wav2vec/output
 
 
 # JetBrains PyCharm IDE

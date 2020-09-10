@@ -30,9 +30,9 @@ def char_in_dict(sentence):
 
 
 def main():
-    src_trans_file = "output/all1_py/test.txt"
-    dataset_path = '/home/psc/Desktop/code/asr/data/mandarin/all1'
-    dataset_name = "test"
+    src_trans_file = "output/all1_py/dev.txt"
+    dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/all1'
+    dataset_name = "dev"
     dest_dir = "output/all1_py"
     discard_cnt = 0
     all_cnt = 0
