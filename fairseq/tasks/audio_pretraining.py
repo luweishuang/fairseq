@@ -9,7 +9,7 @@ import os
 import sys
 
 from fairseq.data import FileAudioDataset, Dictionary, AddTargetDataset
-from . import FairseqTask, register_task
+from . import LegacyFairseqTask, register_task
 
 
 class LabelEncoder(object):
@@ -23,7 +23,7 @@ class LabelEncoder(object):
 
 
 @register_task("audio_pretraining")
-class AudioPretrainingTask(FairseqTask):
+class AudioPretrainingTask(LegacyFairseqTask):
     """
 
     """
@@ -104,7 +104,7 @@ class AudioPretrainingTask(FairseqTask):
         if self.args.labels:
             dict_path = os.path.join(self.args.data, f"dict.{self.args.labels}.txt")
             self._target_dictionary = Dictionary.load(dict_path)
-            label_path = os.path.join(self.args.data, f"{split}.{self.args.labels}.txt")
+            label_path = os.path.join(self.args.data, f"{split}.{self.args.labels}")
             labels = []
             with open(label_path, "r") as f:
                 for line in f:

@@ -18,11 +18,10 @@ import os.path as osp
 import warnings
 from fairseq import tasks
 from fairseq.utils import apply_to_sample
-import torch.nn.functional as F
 from examples.speech_recognition.data.replabels import unpack_replabels
 
 try:
-    from wav2letter.common import create_word_dict, load_words, Dictionary
+    from wav2letter.common import create_word_dict, load_words
     from wav2letter.criterion import CpuViterbiPath, get_data_ptr_as_bytes
     from wav2letter.decoder import (
         CriterionType,
@@ -67,7 +66,7 @@ class W2lDecoder(object):
         else:
             raise RuntimeError(f"unknown criterion: {args.criterion}")
 
-    def generate(self, models, sample, prefix_tokens=None, constraints=None):
+    def generate(self, models, sample, **unused):
         """Generate a batch of inferences."""
         # model.forward normally channels prev_output_tokens into the decoder
         # separately, but SequenceGenerator directly calls model.encoder
@@ -180,8 +179,7 @@ class W2lKenLMDecoder(W2lDecoder):
             self.blank,
             self.unk_word,
             self.asg_transitions,
-            False,    # Lexicon decoder with word-LM
-            # True,       # Lexicon decoder with tkn-LM
+            False,
         )
 
     def decode(self, emissions):
@@ -202,132 +200,6 @@ class W2lKenLMDecoder(W2lDecoder):
                         ],
                     }
                     for result in nbest_results
-                ]
-            )
-        return hypos
-
-
-class W2lKenLMFreeDecoder(W2lDecoder):
-    def __init__(self, args, tgt_dict):
-        super().__init__(args, tgt_dict)
-
-        self.silence = (
-            tgt_dict.index("<ctc_blank>")
-            if "<ctc_blank>" in tgt_dict.indices
-            else tgt_dict.bos()
-        )
-        token_dict = Dictionary(args.lexicon)
-        self.lm = KenLM(args.kenlm_model, token_dict)
-
-        self.decoder_opts = DecoderOptions(
-            args.beam,
-            int(getattr(args, "beam_size_token", len(tgt_dict))),
-            args.beam_threshold,
-            args.lm_weight,
-            args.word_score,
-            args.unk_weight,
-            args.sil_weight,
-            0,
-            False,
-            self.criterion_type,
-        )
-
-        if self.asg_transitions is None:
-            N = 768
-            # self.asg_transitions = torch.FloatTensor(N, N).zero_()
-            self.asg_transitions = []
-
-        self.decoder = LexiconFreeDecoder(
-            self.decoder_opts,
-            self.lm,
-            self.silence,
-            self.blank,
-            self.asg_transitions,   # Lexicon-free decoder with token-LM
-        )
-
-    def top_k_top_p_filtering(self, logits, top_k=0, top_p=0.0, filter_value=-float('Inf')):
-        """ Filter a distribution of logits using top-k and/or nucleus (top-p) filtering
-            Args:
-                logits: logits distribution shape (vocabulary size)
-                top_k > 0: keep only top k tokens with highest probability (top-k filtering).
-                top_p > 0.0: keep the top tokens with cumulative probability >= top_p (nucleus filtering).
-                    Nucleus filtering is described in Holtzman et al. (http://arxiv.org/abs/1904.09751)
-            From: https://gist.github.com/thomwolf/1a5a29f6962089e871b94cbd09daf317
-        """
-        assert logits.dim() == 1  # batch size 1 for now - could be updated for more but the code would be less clear
-        top_k = min(top_k, logits.size(-1))  # Safety check
-        if top_k > 0:
-            # Remove all tokens with a probability less than the last token of the top-k
-            # torch.topk()返回最后一维最大的top_k个元素，返回值为二维(values,indices)
-            # ...表示其他维度由计算机自行推断
-            indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
-            logits[indices_to_remove] = filter_value  # 对于topk之外的其他元素的logits值设为负无穷
-
-        if top_p > 0.0:
-            sorted_logits, sorted_indices = torch.sort(logits, descending=True)  # 对logits进行递减排序
-            cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
-
-            # Remove tokens with cumulative probability above the threshold
-            sorted_indices_to_remove = cumulative_probs > top_p
-            # Shift the indices to the right to keep also the first token above the threshold
-            sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-            sorted_indices_to_remove[..., 0] = 0
-
-            indices_to_remove = sorted_indices[sorted_indices_to_remove]
-            logits[indices_to_remove] = filter_value
-        return logits
-    
-    def decode(self, emissions):
-        B, T, N = emissions.size()
-        hypos = []
-        for b in range(B):
-            emissions_ptr = emissions.data_ptr() + 4 * b * emissions.stride(0)
-            results = self.decoder.decode(emissions_ptr, T, N)
-
-            nbest_results = results[: self.nbest]
-            hypos.append(
-                [
-                    {
-                        "tokens": self.get_tokens(result.tokens),
-                        "score": result.score,
-                    }
-                    for result in nbest_results
-                ]
-            )
-        return hypos
-
-    def decode_1(self, emissions):
-        repetition_penalty = 1.0
-        temperature = 0.88
-        topk = 0
-        topp = 0.85
-
-        B, T, N = emissions.size()
-        hypos = []
-        for b in range(B):
-            cur_emissions = emissions[b]
-            generated = []
-            # 最多生成max_len个token
-            for ii in range(T):
-                next_token_logits = cur_emissions[ii, :]    # shape=(v)
-                # 对于已生成的结果generated中的每个token添加一个重复惩罚项，降低其生成概率
-                for id in set(generated):
-                    next_token_logits[id] /= repetition_penalty
-                next_token_logits = next_token_logits / temperature
-                # 对于[UNK]的概率设为无穷小，也就是说模型的预测结果不可能是[UNK]这个token
-                next_token_logits[self.tgt_dict.index("<unk>")] = -float('Inf')
-                filtered_logits = self.top_k_top_p_filtering(next_token_logits, top_k=topk, top_p=topp)
-                # torch.multinomial表示从候选集合中无放回地进行抽取num_samples个元素，权重越高，抽到的几率越高，返回元素的下标
-                next_token = torch.multinomial(F.softmax(filtered_logits, dim=-1), num_samples=1)
-                if next_token.item() == self.tgt_dict.index("</s>"):  # 遇到[SEP]则表明response生成结束
-                    break
-                generated.append(next_token.item())
-            hypos.append(
-                [
-                    {
-                        "tokens": self.get_tokens(generated),
-                        "score": 100.0,
-                    }
                 ]
             )
         return hypos

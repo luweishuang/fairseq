@@ -267,12 +267,6 @@ class Trainer(object):
         bexists = PathManager.isfile(filename)
         if bexists:
             state = checkpoint_utils.load_checkpoint_to_cpu(filename)
-            # create new OrderedDict that does not contain `module.`
-            # from collections import OrderedDict
-            # new_state_model = OrderedDict()
-            # for k, v in state['model'].items():
-            #     name_new = k.replace("w2v_encoder.", "").replace("w2v_model.", "")
-            #     new_state_model[name_new] = v
 
             # load model parameters
             try:
@@ -345,6 +339,7 @@ class Trainer(object):
         load_dataset=True,
         data_selector=None,
         shard_batch_itr=True,
+        disable_iterator_cache=False,
     ):
         """Return an EpochBatchIterator over the training set for a given epoch."""
         if load_dataset:
@@ -371,11 +366,14 @@ class Trainer(object):
             shard_id=self.data_parallel_rank if shard_batch_itr else 0,
             num_workers=self.args.num_workers,
             epoch=epoch,
+            data_buffer_size=self.args.data_buffer_size,
+            disable_iterator_cache=disable_iterator_cache,
         )
 
     def get_valid_iterator(
         self,
         subset,
+        disable_iterator_cache=False,
     ):
         """Return an EpochBatchIterator over given validation subset for a given epoch."""
         return self.task.get_batch_iterator(
@@ -385,7 +383,6 @@ class Trainer(object):
             max_positions=utils.resolve_max_positions(
                 self.task.max_positions(),
                 self.model.max_positions(),
-                self.args.max_tokens,      # self added
             ),
             ignore_invalid_inputs=self.args.skip_invalid_size_inputs_valid_test,
             required_batch_size_multiple=self.args.required_batch_size_multiple,
@@ -393,6 +390,8 @@ class Trainer(object):
             num_shards=self.data_parallel_world_size,
             shard_id=self.data_parallel_rank,
             num_workers=self.args.num_workers,
+            data_buffer_size=self.args.data_buffer_size,
+            disable_iterator_cache=disable_iterator_cache,
         )
 
     def begin_epoch(self, epoch):

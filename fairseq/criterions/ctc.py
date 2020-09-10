@@ -1,4 +1,8 @@
-# -*- coding: UTF-8 -*-
+# All rights reserved.
+#
+# This source code is licensed under the license found in the LICENSE file in
+# the root directory of this source tree. An additional grant of patent rights
+# can be found in the PATENTS file in the same directory.
 
 from argparse import Namespace
 import math
@@ -21,13 +25,9 @@ class CtcCriterion(FairseqCriterion):
         self.post_process = remove_bpe if remove_bpe else "letter"
 
         if wer_args is not None:
-            from examples.speech_recognition.w2l_decoder import W2lKenLMDecoder, W2lKenLMFreeDecoder
+            from examples.speech_recognition.w2l_decoder import W2lKenLMDecoder
 
-            # wer_compute_kenlm, wer_lexicon, lm_w, ws_w = eval(wer_args)
-            wer_compute_kenlm = "/devdata/home/pishichan/code/asr/asr_v3/models/streaming_convnets/language_model.bin"
-            wer_lexicon = "/devdata/home/pishichan/code/asr/asr_v3/models/streaming_convnets/lexicon.txt"
-            lm_w = 2
-            ws_w = -1
+            wer_compute_kenlm, wer_lexicon, lm_w, ws_w = eval(wer_args)
 
             dec_args = Namespace()
             dec_args.nbest = 1
@@ -42,8 +42,7 @@ class CtcCriterion(FairseqCriterion):
             dec_args.unk_weight = -math.inf
             dec_args.sil_weight = 0
 
-            # self.w2l_decoder = W2lKenLMDecoder(dec_args, task.target_dictionary)
-            self.w2l_decoder = W2lKenLMFreeDecoder(dec_args, task.target_dictionary)
+            self.w2l_decoder = W2lKenLMDecoder(dec_args, task.target_dictionary)
         else:
             self.w2l_decoder = None
 
@@ -132,12 +131,6 @@ class CtcCriterion(FairseqCriterion):
                     else sample["target"],
                     input_lengths,
                 ):
-<<<<<<< HEAD
-                    print("inp_l = ", inp_l)
-                    print("lp.size = ", lp.size())
-=======
-                    # print("lp.size = ", lp.size())    # inp_l, 8583
->>>>>>> 252efa99d9194b2e3e2a842e14747e9aa8806f3f
                     lp = lp[:inp_l].unsqueeze(0)
 
                     decoded = None
@@ -162,12 +155,6 @@ class CtcCriterion(FairseqCriterion):
                     toks = lp.argmax(dim=-1).unique_consecutive()
                     pred_units_arr = toks[toks != self.blank_idx].tolist()
 
-                    # print("pred_units_arr = ", pred_units_arr)
-                    # print("targ_units_arr = ", targ_units_arr)
-                    # if len(pred_units_arr) == 0:
-                    #     print("inp_l = ", inp_l)
-                    #     print("lp = ", lp)
-                    #     print("toks = ", toks)    # 几乎都指向 0
                     c_err += editdistance.eval(pred_units_arr, targ_units_arr)
                     c_len += len(targ_units_arr)
 
