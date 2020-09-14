@@ -30,10 +30,10 @@ def char_in_dict(sentence):
 
 
 def main():
-    src_trans_file = "output/all1_py/dev.txt"
-    dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin/all1'
-    dataset_name = "dev"
-    dest_dir = "output/all1_py"
+    src_trans_file = "output/all50_py/train.txt"
+    dataset_path = '/devdata/home/pishichan/code/asr/data/mandarin'
+    dataset_name = "train"
+    dest_dir = "output/all50_py"
     discard_cnt = 0
     all_cnt = 0
     with open(os.path.join(dest_dir, dataset_name + '.tsv'), 'w') as tsv_fw, open(os.path.join(dest_dir, dataset_name + '.ltr.txt'), 'w') as ltr_fw, open(os.path.join(dest_dir, dataset_name + '.wrd.txt'), 'w') as wrd_fw:
