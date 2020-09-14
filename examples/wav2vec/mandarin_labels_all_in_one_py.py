@@ -3,6 +3,7 @@
 import soundfile
 import os
 import re
+import glob
 import string
 from pypinyin import pinyin, lazy_pinyin, Style
 
@@ -70,6 +71,41 @@ def main():
     print("discard_cnt = %d, all_cnt = %d " % (discard_cnt, all_cnt))
 
 
+def generate_lexicon_file():
+    basedir = "/home/psc/Desktop/code/asr/data/mandarin/"
+    wrd_list_all = []
+    discard_cnt = 0
+    search_path = os.path.join(basedir, '*/*/*/' + "trans.txt")
+    for fname in glob.iglob(search_path, recursive=True):
+        trans_path = os.path.realpath(fname)
+        with open(trans_path, 'r') as fr:
+            for cur_line in fr:
+                wav_name, cur_trans = cur_line.strip().split("<--->")
+                true_sentence = pattern.sub(u'', cur_trans)
+                if not char_in_dict(true_sentence):
+                    print("cur %s trans is not purely dict char, as %s" % (wav_name, true_sentence))
+                    discard_cnt += 1
+                    continue
+
+                py_list = pinyin(true_sentence, style=Style.TONE3, heteronym=False)
+                for wrd in py_list:
+                    cur_wrd = wrd[0].replace("1", "").replace("2", "").replace("3", "").replace("4", "").replace(" ", "")
+                    wrd_list_all.append(cur_wrd)
+
+    wrd_list_all = list(set(wrd_list_all))
+    wrd_list_all.sort()
+    print("len(wrd_list_all) = ", len(wrd_list_all))
+
+    lexicon_file = "lexicon.txt"
+    with open(lexicon_file, "w") as fw:
+        for cur_wrd in wrd_list_all:
+            w_str = cur_wrd + "\t"
+            for cur_char in cur_wrd:
+                w_str += cur_char + " "
+            fw.write(w_str[:-1] + " |\n")
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    generate_lexicon_file()
 

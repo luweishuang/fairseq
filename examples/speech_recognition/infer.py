@@ -419,6 +419,7 @@ def make_parser():
     parser = add_asr_eval_argument(parser)
     return parser
 
+
 def cli_main():
     parser = make_parser()
     args = options.parse_args_and_arch(parser)
