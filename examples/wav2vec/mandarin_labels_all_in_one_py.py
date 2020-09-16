@@ -148,9 +148,31 @@ def generate_py_test():
             fw.write(wrd_str[:-1] + "\n")
 
 
+def generate_lexicon_zh():
+    src_file = "output/all20_py/lexicon.txt"
+    dst_file = src_file.replace(".txt", "_new.txt")
+    with open(src_file, "r") as fr, open(dst_file, "w") as fw:
+        for line in fr:
+            true_sentence = line.strip()   #   "解"
+            py_list = pinyin(true_sentence, style=Style.TONE3, heteronym=True)
+            exist_pinyin = []
+            # if len(py_list[0]) > 1:
+            #     print("000000000000")
+            for wrd in py_list[0]:
+                cur_wrd = wrd.replace("1", "").replace("2", "").replace("3", "").replace("4", "").replace(" ", "")
+                if cur_wrd in exist_pinyin:
+                    continue
+                else:
+                    exist_pinyin.append(cur_wrd)
+                w_str = true_sentence + "\t"
+                for cur_char in cur_wrd:
+                    w_str += cur_char + " "
+                fw.write(w_str[:-1] + " |\n")
+
+
 if __name__ == "__main__":
     # main()
     # generate_lexicon_file()
     # generate_lexicon_simple()
-    generate_py_test()
+    generate_lexicon_zh()
 
