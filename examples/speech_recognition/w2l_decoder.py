@@ -137,6 +137,8 @@ class W2lKenLMDecoder(W2lDecoder):
         self.lexicon = load_words(args.lexicon)
         self.word_dict = create_word_dict(self.lexicon)
         self.unk_word = self.word_dict.get_index("<unk>")
+        # ll = self.word_dict.index_size()
+        # l1 = self.word_dict.entry_size()
 
         self.lm = KenLM(args.kenlm_model, self.word_dict)
         self.trie = Trie(self.vocab_size, self.silence)
