@@ -92,8 +92,8 @@ def main():
 
 
 def generate_lexicon_file():
-    # basedir = '/devdata/home/pishichan/code/asr/data/mandarin/'
-    basedir = "/home/psc/Desktop/code/asr/data/mandarin/"
+    basedir = '/devdata/home/pishichan/code/asr/data/mandarin/'
+    # basedir = "/home/psc/Desktop/code/asr/data/mandarin/"
     trans_list = []
     search_path = os.path.join(basedir, '*/*/*/' + "trans.txt")
     for fname in glob.iglob(search_path, recursive=True):
@@ -127,7 +127,6 @@ def generate_lexicon_file():
                 w_str = cur_wrd + "\t"
                 for cur_py in py_list:
                     l1 = cur_py[0].replace("1", "").replace("2", "").replace("3", "").replace("4", "").replace(" ", "")
-                    ll_all.append(l1)
                     w_str += l1 + " "
                 lexicon_list.append(w_str + "|")
     lexicon_file = "output/all20_pyl/lexicon_pyl.txt"
